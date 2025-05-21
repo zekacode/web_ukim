@@ -1,72 +1,113 @@
 <?php
-include('./layout/header-admin.php');
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+require_once('../conn/controller.php'); // Gunakan require_once
 
-// Proses tambah karya
-if (isset($_POST['tambah'])) {
-    if (tambah_karya($_POST, $_FILES) > 0) {
-        echo "<script>
-            alert('Karya Baru Berhasil Ditambahkan');
-            document.location.href = 'karya.php';
-        </script>";
+// Cek hak akses
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /web_ukim/login.php'); // Sesuaikan path
+    exit();
+}
+
+$message = '';
+$message_type = '';
+
+// Proses Tambah Karya menggunakan fungsi dari controller.php
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tambah_karya'])) {
+    $karyaData = [
+        'id_category'   => $_POST['id_category'], // Nama input harus 'id_category'
+        'judul'         => $_POST['judul'],
+        'isi'           => $_POST['isi'],
+        'status'        => $_POST['status'] ?? 'pending' // Default status 'pending'
+    ];
+
+    $userId = $_SESSION['user_id'];
+    // File pendukung untuk karya cipta bersifat opsional di controller
+    $fileData = (isset($_FILES['file_pendukung']) && $_FILES['file_pendukung']['error'] == UPLOAD_ERR_OK) ? $_FILES['file_pendukung'] : null;
+
+    $newKaryaId = create_karya($karyaData, $fileData, $userId);
+
+    if ($newKaryaId) {
+        $message = "Karya baru berhasil ditambahkan!";
+        $message_type = 'success';
+        $_POST = array(); // Kosongkan form
+        // header("Location: karya.php?status=added");
+        // exit;
     } else {
-        echo "<script>
-            alert('Karya Baru Gagal Ditambahkan');
-            document.location.href = 'karya-add.php';
-        </script>";
+        $message = "Gagal menambahkan karya. Periksa kembali input Anda.";
+        $message_type = 'danger';
     }
 }
 
-// Fungsi untuk mendapatkan nilai ENUM dari database
-function getEnumValues($conn, $table, $column) {
-    $query = "SHOW COLUMNS FROM $table LIKE '$column'";
-    $result = mysqli_query($conn, $query);
-    $row = mysqli_fetch_array($result);
-    $type = $row['Type'];
+// Ambil data kategori karya dari controller
+$karyaCategories = get_all_karya_categories(); // Fungsi ini harus ada di controller.php
 
-    preg_match("/^enum\((.*)\)$/", $type, $matches);
-    $enumValues = explode(",", $matches[1]);
-
-    return array_map(function ($value) {
-        return trim($value, "'");
-    }, $enumValues);
-}
-
-// Ambil nilai ENUM untuk dropdown kategori
-$kategoriValues = getEnumValues($conn, 'karya_cipta', 'kategori');
+include('./layout/header-admin.php');
 ?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Karya Baru - Admin UKIM</title>
+    <link rel="stylesheet" href="../style/admin-form.css">
+</head>
 <body>
-    <div class="main-table">
-        <form action="" method="post" enctype="multipart/form-data">
-            <h3 class="mb-3">Buat Karya Baru
-                <a href="karya.php" class="btn btn-secondary">Daftar Karya</a>
+    <div class="admin-form-container">
+        <form action="karya-add.php" method="post" enctype="multipart/form-data">
+            <h3>
+                Buat Karya Baru
+                <a href="karya.php" class="btn btn-sm btn-secondary">Kembali ke Daftar Karya</a>
             </h3>
 
-            <!-- Dropdown Kategori -->
-            <div class="mb-3 col-6">
-                <label for="kategori" class="form-label">Kategori</label>
-                <select name="kategori" id="kategori" class="form-control" required>
+            <?php if (!empty($message)): ?>
+                <div class="alert alert-<?php echo $message_type; ?>">
+                    <?php echo htmlspecialchars($message); ?>
+                </div>
+            <?php endif; ?>
+
+            <div class="form-group">
+                <label for="id_category" class="form-label">Kategori Karya <span class="text-danger">*</span></label>
+                <select name="id_category" id="id_category" class="form-control" required>
                     <option value="">-- Pilih Kategori --</option>
-                    <?php foreach ($kategoriValues as $value): ?>
-                        <option value="<?= htmlspecialchars($value); ?>">
-                            <?= htmlspecialchars($value); ?>
-                        </option>
-                    <?php endforeach; ?>
+                    <?php if ($karyaCategories): ?>
+                        <?php foreach ($karyaCategories as $category): ?>
+                            <option value="<?php echo htmlspecialchars($category['id_category']); ?>" <?php echo (isset($_POST['id_category']) && $_POST['id_category'] == $category['id_category']) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($category['nama_category']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </select>
             </div>
 
-            <!-- Input Judul -->
-            <div class="mb-3">
-                <label for="judul" class="form-label">Judul</label>
-                <input type="text" class="form-control" id="judul" name="judul" placeholder="Judul ..." required>
+            <div class="form-group">
+                <label for="judul" class="form-label">Judul Karya <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="judul" name="judul" placeholder="Masukkan judul karya..." required value="<?php echo htmlspecialchars($_POST['judul'] ?? ''); ?>">
             </div>
 
-            <!-- Input Isi -->
-            <div class="mb-3">
-                <label for="isi" class="form-label">Isi</label>
-                <textarea class="form-control" id="isi" name="isi" rows="5" placeholder="Isi karya ..." required></textarea>
+            <div class="form-group">
+                <label for="isi" class="form-label">Isi/Deskripsi Karya <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="isi" name="isi" rows="10" placeholder="Tulis isi atau deskripsi karya di sini..." required><?php echo htmlspecialchars($_POST['isi'] ?? ''); ?></textarea>
+                <!-- Bisa integrasikan Rich Text Editor jika perlu -->
             </div>
 
-            <button type="submit" name="tambah" class="btn btn-primary">Tambah</button>
+            <div class="form-group">
+                <label for="file_pendukung" class="form-label">File Pendukung (Opsional)</label>
+                <input type="file" class="form-control" id="file_pendukung" name="file_pendukung" accept=".pdf,.doc,.docx,.txt,image/*">
+                <small class="form-text text-muted">Format: PDF, DOC, DOCX, TXT, Gambar. Maks 10MB.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="status" class="form-label">Status</label>
+                <select name="status" id="status" class="form-control">
+                    <option value="pending" <?php echo (isset($_POST['status']) && $_POST['status'] == 'pending') ? 'selected' : (!isset($_POST['status']) ? 'selected' : ''); ?>>Pending Review</option>
+                    <option value="published" <?php echo (isset($_POST['status']) && $_POST['status'] == 'published') ? 'selected' : ''; ?>>Published</option>
+                    <option value="rejected" <?php echo (isset($_POST['status']) && $_POST['status'] == 'rejected') ? 'selected' : ''; ?>>Rejected</option>
+                </select>
+            </div>
+
+            <button type="submit" name="tambah_karya" class="btn btn-primary">Tambah Karya</button>
         </form>
     </div>
 </body>

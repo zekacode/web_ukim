@@ -41,7 +41,7 @@ $user_role = isset($_SESSION['user_role']) ? $_SESSION['user_role'] : null;
                 <!-- Sesuaikan href dengan lokasi file admin.php -->
                 <li><a href="admin.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                 <li><a href="article.php"><i class="fas fa-blog"></i> Blog</a></li>
-                <li><a href="kelola_karya.php"><i class="fas fa-pencil-alt"></i> Karya Cipta</a></li>
+                <li><a href="karya.php"><i class="fas fa-pencil-alt"></i> Karya Cipta</a></li>
                 <li><a href="event.php"><i class="fas fa-calendar-alt"></i> Event</a></li>
                 <li><a href="kelola_prestasi.php"><i class="fas fa-trophy"></i> Prestasi</a></li>
                 <?php // Tampilkan menu Kelola User hanya untuk role 'admin' ?>
