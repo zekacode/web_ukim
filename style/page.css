@@ -1,0 +1,126 @@
+:root {
+    --primary-color: #FFC436;
+    --secondary-color: #0C356A;
+    --text-dark-color: #333;
+    --text-light-color: #FFFFFF;
+    --main-font: 'Montserrat', sans-serif;
+    --heading-font: 'Lora', serif;
+}
+
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--main-font);
+    background-color: #f4f4f4;
+    color: var(--text-dark-color);
+}
+
+/* Container */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+header {
+    text-align: center;
+    margin-bottom: 0px;
+}
+
+.judul {
+    font-family: var(--heading-font);
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--secondary-color);
+    margin-bottom: 10px;
+}
+
+/* Content Section */
+.content {
+    margin-bottom: 0px;
+    text-align: center;
+}
+
+.content p {
+    font-size: 1.1rem;
+    color: #555;
+    line-height: 1.8;
+    margin-bottom: 0px;
+}
+
+/* Image Styling */
+.image {
+    display: block;
+    margin: 40px auto;
+    width: 80%;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.image:hover {
+    transform: scale(1.05);
+}
+
+/* Article Section */
+.article {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.article-content {
+    font-size: 1.1rem;
+    color: #555;
+    line-height: 1.8;
+}
+
+.article-content p {
+    margin-bottom: 15px;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .judul {
+        font-size: 2rem;
+    }
+
+    .content p {
+        font-size: 1rem;
+    }
+
+    .image {
+        width: 100%;
+    }
+
+    .article-content {
+        font-size: 1rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .judul {
+        font-size: 1rem;
+    }
+
+    .content p {
+        font-size: 0.8rem;
+    }
+
+    .image {
+        width: 100%;
+    }
+
+    .article-content {
+        font-size: 0.6rem;
+    }
+}

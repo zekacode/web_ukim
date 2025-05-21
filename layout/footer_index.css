@@ -1,0 +1,98 @@
+:root {
+    --primary-color: #FFC436;
+    --secondary-color: #0C356A;
+    --text-dark-color: #333;
+    --text-light-color: #FFFFFF;
+    --main-font: 'Montserrat', sans-serif;
+    --heading-font: 'Lora', serif;
+}
+
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--main-font);
+    background-color: #f4f4f4;
+    color: var(--text-dark-color);
+}
+
+/* Footer Section */
+footer {
+    background-color: var(--secondary-color);
+    padding: 30px;
+    text-align: center;
+    color: var(--primary-color);
+}
+
+footer h2 {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+footer p {
+    margin-bottom: 20px;
+    font-size: 1em;
+    color: var(--text-light-color);
+}
+
+.social-icons {
+    margin-bottom: 20px;
+}
+
+.social-icons a {
+    margin: 0 10px;
+    display: inline-block;
+}
+
+.social-icons img {
+    width: 40px;
+    height: 40px;
+    transition: transform 0.3s ease;
+}
+
+.social-icons a:hover img {
+    transform: scale(1.2);
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    footer h2 {
+        font-size: 1.5em;
+    }
+
+    footer p {
+        font-size: 0.9em;
+    }
+
+    .social-icons img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .social-icons a {
+        margin: 0 5px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    footer h2 {
+        font-size: 1.2em;
+    }
+
+    footer p {
+        font-size: 0.8em;
+    }
+
+    .social-icons img {
+        width: 25px;
+        height: 25px;
+    }
+
+    .social-icons a {
+        margin: 0 3px;
+    }
+}

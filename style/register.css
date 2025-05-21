@@ -1,0 +1,235 @@
+/* style/register.css */
+
+/* Root Variables (bisa di-share dengan login.css atau didefinisikan ulang) */
+:root {
+    --primary-color: #FFC436;
+    --secondary-color: #0C356A;
+    --accent-color: #007bff;
+    --error-color: #dc3545;
+    --success-color: #28a745;
+    --text-dark-color: #333;
+    --text-light-color: #FFFFFF;
+    --background-light: #f8f9fa;
+    --border-color: #ced4da;
+    --main-font: 'Montserrat', sans-serif;
+    --heading-font: 'Lora', serif;
+}
+
+/* General Reset (jika belum ada di file CSS global) */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--main-font);
+    background-color: var(--background-light); /* Latar belakang yang bersih */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align ke atas untuk form panjang */
+    min-height: 100vh;
+    color: var(--text-dark-color);
+    padding: 30px 20px; /* Padding body agar form tidak mepet */
+}
+
+/* Register Wrapper */
+.register-wrapper {
+    background-color: var(--text-light-color);
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.1); /* Shadow lebih noticeable */
+    width: 100%;
+    max-width: 600px; /* Lebih lebar untuk form registrasi */
+    border-top: 5px solid var(--secondary-color);
+    margin-bottom: 30px; /* Margin bawah jika konten melebihi viewport */
+}
+
+/* Register Form Header */
+.register-form-container h2 {
+    font-family: var(--heading-font);
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--secondary-color);
+}
+
+/* Form Grouping */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* Label */
+label {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-dark-color);
+    margin-bottom: 8px;
+    display: block;
+}
+
+label .required {
+    color: var(--error-color);
+    font-weight: bold;
+    margin-left: 2px;
+}
+
+/* Input Fields */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 16px;
+    color: var(--text-dark-color);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(12, 53, 106, 0.25);
+    outline: none;
+}
+
+/* Input Placeholder Styling (opsional) */
+input::placeholder {
+    color: #aaa;
+    font-style: italic;
+}
+
+/* Small text (misal untuk info password) */
+.form-group small {
+    display: block;
+    font-size: 12px;
+    color: #6c757d; /* Abu-abu netral */
+    margin-top: 5px;
+}
+
+/* Horizontal Rule (Pemisah) */
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #e9ecef; /* Warna lebih soft */
+    margin: 25px 0;
+}
+
+/* Button Register */
+.btn-register { /* Class khusus untuk tombol register */
+    background-color: var(--secondary-color);
+    color: var(--text-light-color);
+    padding: 14px 0; /* Padding lebih besar */
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    font-weight: 500;
+    width: 100%;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    margin-top: 15px;
+}
+
+.btn-register:hover {
+    background-color: #114a94;
+}
+
+.btn-register:active {
+    transform: scale(0.98);
+}
+
+/* Message Styling (Error & Success) */
+.error-message,
+.success-message {
+    padding: 12px 18px;
+    border-radius: 5px;
+    margin-bottom: 25px;
+    font-size: 15px;
+    text-align: center;
+    border-width: 1px;
+    border-style: solid;
+}
+
+.error-message {
+    background-color: rgba(220, 53, 69, 0.05); /* Background lebih soft */
+    color: var(--error-color);
+    border-color: rgba(220, 53, 69, 0.2);
+}
+
+.success-message {
+    background-color: rgba(40, 167, 69, 0.05); /* Background lebih soft */
+    color: var(--success-color);
+    border-color: rgba(40, 167, 69, 0.2);
+}
+
+/* Link to Login Styling */
+.login-link-container { /* Class berbeda untuk link di bawah form register */
+    text-align: center;
+    margin-top: 30px;
+    font-size: 15px;
+    color: #555;
+}
+
+.login-link-container a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.login-link-container a:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+/* Register Link Styling */
+.register-link {
+    text-align: center;
+    margin-top: 25px; /* Jarak dari tombol login */
+    font-size: 14px;
+    color: #555;
+}
+
+.register-link a {
+    color: var(--accent-color); /* Gunakan warna aksen */
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.register-link a:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+/* Responsive adjustments (Contoh sederhana) */
+@media (max-width: 640px) {
+    .register-wrapper {
+        padding: 20px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .register-form-container h2 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    .btn-register {
+        font-size: 15px;
+        padding: 10px 12px;
+    }
+
+    .btn-register {
+        padding: 12px 0;
+    }
+}

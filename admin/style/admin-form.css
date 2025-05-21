@@ -1,0 +1,137 @@
+/* ./style/admin-form.css */
+
+body {
+    /* Asumsi Anda sudah punya styling dasar dari header-admin.php atau CSS global admin */
+    font-family: 'Montserrat', sans-serif;
+    background-color: #f4f6f9; /* Warna latar admin yang umum */
+    color: #333;
+    line-height: 1.6;
+}
+
+.admin-form-container {
+    background-color: #fff;
+    padding: 25px 30px;
+    margin: 30px auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 800px; /* Lebar form */
+}
+
+.admin-form-container h3 {
+    font-family: 'Lora', serif;
+    color: #0C356A; /* Warna sekunder */
+    margin-bottom: 25px;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 10px;
+    display: flex; /* Untuk mensejajarkan judul dan tombol */
+    justify-content: space-between; /* Tombol ke kanan */
+    align-items: center; /* Vertikal tengah */
+}
+
+.admin-form-container h3 .btn { /* Styling untuk tombol di samping judul */
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #495057;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+textarea.form-control {
+    min-height: 120px; /* Tinggi minimal untuk textarea */
+    resize: vertical; /* Izinkan resize vertikal */
+}
+
+.form-control[type="file"] {
+    padding: 8px 12px; /* Sedikit penyesuaian untuk input file */
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    border: 1px solid transparent;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+.btn-primary:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.current-image-preview {
+    margin-top: 10px;
+    max-width: 200px; /* Batasi ukuran preview gambar */
+    max-height: 200px;
+    border: 1px solid #ddd;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}

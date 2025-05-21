@@ -1,0 +1,140 @@
+/* Root Variables */
+:root {
+    --primary-color: #FFC436;
+    --secondary-color: #0C356A; /* Warna biru UKIM? */
+    --accent-color: #007bff; /* Warna link alternatif */
+    --error-color: #dc3545; /* Merah untuk error */
+    --success-color: #28a745; /* Hijau untuk sukses (jika perlu) */
+    --text-dark-color: #333;
+    --text-light-color: #FFFFFF;
+    --background-light: #f8f9fa; /* Warna background lebih lembut */
+    --border-color: #ced4da; /* Warna border input */
+    --main-font: 'Montserrat', sans-serif;
+    --heading-font: 'Lora', serif;
+}
+
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--main-font);
+    background-color: var(--background-light);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Gunakan min-height agar konten tidak terpotong */
+    color: var(--text-dark-color);
+    padding: 20px; /* Tambahkan padding agar tidak terlalu mepet di layar kecil */
+}
+
+/* Login Wrapper */
+.login-wrapper {
+    background-color: var(--text-light-color);
+    padding: 30px 40px; /* Sesuaikan padding */
+    border-radius: 10px;
+    box-shadow: 0px 5px 25px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 420px; /* Sedikit lebih lebar */
+    border-top: 5px solid var(--secondary-color); /* Aksen warna di atas */
+}
+
+/* Login Form Header */
+.login-form-container h2 {
+    font-family: var(--heading-font);
+    font-size: 26px; /* Sedikit lebih kecil */
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 25px; /* Jarak lebih */
+    color: var(--secondary-color);
+}
+
+/* Form Grouping */
+.form-group {
+    margin-bottom: 20px; /* Jarak antar group input */
+}
+
+/* Label */
+label {
+    font-size: 15px; /* Sedikit lebih kecil */
+    font-weight: 500;
+    color: var(--text-dark-color);
+    margin-bottom: 6px; /* Jarak ke input */
+    display: block;
+}
+
+/* Input Fields */
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 12px 15px; /* Padding lebih nyaman */
+    /* margin: 8px 0 15px 0; Dihapus, diatur oleh .form-group */
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 16px;
+    color: var(--text-dark-color);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type="text"]:focus, input[type="password"]:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(12, 53, 106, 0.2); /* Efek focus */
+    outline: none;
+}
+
+/* Button Login */
+.btn-login { /* Lebih spesifik dengan class */
+    background-color: var(--secondary-color);
+    color: var(--text-light-color);
+    padding: 12px 0;
+    border: none;
+    border-radius: 5px;
+    font-size: 17px;
+    font-weight: 500; /* Sedikit bold */
+    width: 100%;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    margin-top: 10px; /* Jarak dari input terakhir */
+}
+
+.btn-login:hover {
+    background-color: #114a94; /* Warna hover lebih gelap */
+}
+
+.btn-login:active {
+    transform: scale(0.98); /* Efek tekan */
+}
+
+/* Error Message Styling */
+.error-message {
+    background-color: rgba(220, 53, 69, 0.1); /* Background merah transparan */
+    color: var(--error-color);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 20px; /* Jarak ke form */
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Register Link Styling */
+.register-link {
+    text-align: center;
+    margin-top: 25px; /* Jarak dari tombol login */
+    font-size: 14px;
+    color: #555;
+}
+
+.register-link a {
+    color: var(--accent-color); /* Gunakan warna aksen */
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.register-link a:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}

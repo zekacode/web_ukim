@@ -1,0 +1,194 @@
+:root {
+    --primary-color: #FFC436;
+    --secondary-color: #0C356A;
+    --text-dark-color: #333;
+    --text-light-color: #FFFFFF;
+    --main-font: 'Montserrat', sans-serif;
+    --heading-font: 'Lora', serif;
+}
+
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--main-font);
+    background-color: #f4f4f4;
+    color: var(--text-dark-color);
+}
+
+/* Navbar Styling */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 50px;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    top: 0;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.logo-nav-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: var(--secondary-color);
+    transition: color 0.3s;
+}
+
+.logo:hover {
+    color: var(--primary-color);
+}
+
+.nav-links {
+    list-style-type: none;
+    display: flex;
+    gap: 30px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.nav-links li {
+    position: relative;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-dark-color);
+    font-size: 1em;
+    font-weight: 500;
+    transition: color 0.3s, transform 0.3s;
+    padding: 5px;
+}
+
+.login-container {
+    display: flex;
+    align-items: center;
+}
+
+.btn-login {
+    background-color: #FFC436;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: var(--primary-color);
+}
+
+/* Underline Effect on Hover */
+.nav-links a::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background-color: var(--primary-color);
+    bottom: 0;
+    left: 0;
+    transition: width 0.3s;
+}
+
+.nav-links a:hover::after {
+    width: 100%;
+}
+
+.btn-login:hover {
+    background-color: #0C356A;
+}
+
+/* Burger Menu for Mobile */
+.burger-menu {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 25px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.burger-menu .line {
+    width: 100%;
+    height: 3px;
+    background-color: var(--text-dark-color);
+    transition: all 0.3s ease;
+}
+
+.nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    z-index: 999;
+}
+
+.nav-overlay.active {
+    transform: translateX(0);
+}
+
+.nav-links-mobile {
+    list-style-type: none;
+    padding: 0;
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.nav-links-mobile a {
+    text-decoration: none;
+    font-size: 1.2em;
+    color: var(--text-dark-color);
+    transition: color 0.3s;
+}
+
+.nav-links-mobile a:hover {
+    color: var(--primary-color);
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .nav-links {
+        display: none;
+    }
+
+    .login-container {
+        display: none;
+    }
+
+    .burger-menu {
+        display: flex;
+    }
+}
+
+/* Close Button */
+.close-btn {
+    font-size: 1.5em;
+    cursor: pointer;
+    display: none;
+}
+
+.nav-overlay.active .close-btn {
+    display: block;
+}
