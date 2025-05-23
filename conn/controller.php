@@ -800,6 +800,135 @@ function get_all_karya($limit = null, $offset = 0) {
     return $karyas;
 }
 
+// Di dalam conn/controller.php
+
+/**
+ * Mengambil data satu karya cipta berdasarkan SLUG.
+ * @param string $slug Slug karya.
+ * @return array|false Array data karya jika ditemukan, false jika tidak.
+ */
+function get_karya_by_slug($slug) {
+    global $conn;
+    // Ambil karya yang statusnya 'published'
+    $sql = "SELECT k.*, kc.nama_category, u.nama_lengkap as author_name
+            FROM karya_cipta k
+            LEFT JOIN karya_categories kc ON k.id_category = kc.id_category
+            LEFT JOIN users u ON k.user_id = u.id_user
+            WHERE k.slug = ? AND k.status = 'published' LIMIT 1"; // Hanya ambil yang published
+    $stmt = mysqli_prepare($conn, $sql);
+
+     if (!$stmt) {
+        // error_log("Get Karya By SLUG Prepare Error: " . mysqli_error($conn));
+        return false;
+    }
+
+    mysqli_stmt_bind_param($stmt, "s", $slug);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $karya = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+    return $karya;
+}
+
+/**
+ * Mengambil semua data karya cipta dengan filter opsional dan paginasi.
+ * @param int|null $limit
+ * @param int $offset
+ * @param int|null $category_id ID kategori untuk filter.
+ * @param string $status Status karya yang ingin diambil.
+ * @return array|false
+ */
+function get_all_karya_filtered($limit = null, $offset = 0, $category_id = null, $status = 'published') {
+    global $conn;
+    $params = [];
+    $types = "";
+
+    $sql = "SELECT k.id_karya, k.slug, k.judul, k.isi, k.created_at, k.file_pendukung, kc.nama_category, u.nama_lengkap as author_name
+            FROM karya_cipta k
+            LEFT JOIN karya_categories kc ON k.id_category = kc.id_category
+            LEFT JOIN users u ON k.user_id = u.id_user
+            WHERE 1=1";
+
+    if (!empty($status)) {
+        $sql .= " AND k.status = ?";
+        $params[] = $status;
+        $types .= "s";
+    }
+
+    if ($category_id !== null && ctype_digit((string)$category_id) && $category_id > 0) {
+        $sql .= " AND k.id_category = ?";
+        $params[] = (int)$category_id;
+        $types .= "i";
+    }
+
+    $sql .= " ORDER BY k.created_at DESC";
+
+    if ($limit !== null && is_numeric($limit) && $limit > 0) {
+        $sql .= " LIMIT ? OFFSET ?";
+        $params[] = (int)$limit;
+        $params[] = (int)$offset;
+        $types .= "ii";
+    }
+
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        // error_log("Get All Karya Filtered Prepare Error: " . mysqli_error($conn));
+        return false;
+    }
+
+    if (!empty($types) && count($params) > 0) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $karyas = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    mysqli_stmt_close($stmt);
+    return $karyas;
+}
+
+/**
+ * Menghitung total karya cipta dengan filter opsional (untuk paginasi).
+ * @param int|null $category_id
+ * @param string $status
+ * @return int|false
+ */
+function count_all_karya_filtered($category_id = null, $status = 'published') {
+    global $conn;
+    $params = [];
+    $types = "";
+
+    $sql = "SELECT COUNT(k.id_karya) as total
+            FROM karya_cipta k
+            WHERE 1=1";
+
+    if (!empty($status)) {
+        $sql .= " AND k.status = ?";
+        $params[] = $status;
+        $types .= "s";
+    }
+
+    if ($category_id !== null && ctype_digit((string)$category_id) && $category_id > 0) {
+        $sql .= " AND k.id_category = ?";
+        $params[] = (int)$category_id;
+        $types .= "i";
+    }
+
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        // error_log("Count Karya Filtered Prepare Error: " . mysqli_error($conn));
+        return false;
+    }
+     if (!empty($types) && count($params) > 0) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+    return $row ? (int)$row['total'] : 0;
+}
+
 /**
  * Mengambil data satu karya cipta berdasarkan ID.
  * @param int $id_karya
