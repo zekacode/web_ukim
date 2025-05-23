@@ -399,6 +399,35 @@ function get_all_blogs($limit = null, $offset = 0) {
 }
 
 /**
+ * Mengambil beberapa blog terbaru untuk ditampilkan di beranda.
+ * @param int $limit Jumlah blog yang ingin ditampilkan.
+ * @return array|false Array data blog jika berhasil, false jika gagal.
+ */
+function get_latest_blogs($limit = 3) {
+    global $conn;
+    // Mengambil blog yang statusnya 'published' dan diurutkan dari terbaru
+    $sql = "SELECT b.id_blog, b.slug, b.judul, b.gambar, b.created_at, d.nama_dept
+            FROM blog_ukim b
+            LEFT JOIN departments d ON b.id_dept = d.id_dept
+            WHERE b.status = 'published'
+            ORDER BY b.created_at DESC
+            LIMIT ?";
+    $stmt = mysqli_prepare($conn, $sql);
+
+    if (!$stmt) {
+        // error_log("Get Latest Blogs Prepare Error: " . mysqli_error($conn));
+        return false;
+    }
+
+    mysqli_stmt_bind_param($stmt, "i", $limit);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $blogs = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    mysqli_stmt_close($stmt);
+    return $blogs;
+}
+
+/**
  * Mengambil data satu blog berdasarkan ID.
  * @param int $id_blog ID blog.
  * @return array|false Array data blog jika ditemukan, false jika tidak.
@@ -423,6 +452,137 @@ function get_blog_by_id($id_blog) {
     $blog = mysqli_fetch_assoc($result);
     mysqli_stmt_close($stmt);
     return $blog; // Mengembalikan data atau null jika tidak ditemukan
+}
+
+// Di dalam conn/controller.php
+
+/**
+ * Mengambil semua data blog dengan filter opsional dan paginasi.
+ * @param int|null $limit Jumlah data per halaman.
+ * @param int $offset Mulai dari data ke berapa.
+ * @param int|null $department_id ID departemen untuk filter.
+ * @param string $status Status blog yang ingin diambil (e.g., 'published').
+ * @return array|false Array data blog jika berhasil, false jika gagal.
+ */
+function get_all_blogs_filtered($limit = null, $offset = 0, $department_id = null, $status = 'published') {
+    global $conn;
+    $params = [];
+    $types = "";
+
+    $sql = "SELECT b.id_blog, b.slug, b.judul, b.gambar, b.isi, b.created_at, d.nama_dept, u.nama_lengkap as author_name
+            FROM blog_ukim b
+            LEFT JOIN departments d ON b.id_dept = d.id_dept
+            LEFT JOIN users u ON b.user_id = u.id_user
+            WHERE 1=1"; // Klausa WHERE awal
+
+    if (!empty($status)) {
+        $sql .= " AND b.status = ?";
+        $params[] = $status;
+        $types .= "s";
+    }
+
+    if ($department_id !== null && ctype_digit((string)$department_id) && $department_id > 0) {
+        $sql .= " AND b.id_dept = ?";
+        $params[] = (int)$department_id;
+        $types .= "i";
+    }
+
+    $sql .= " ORDER BY b.created_at DESC";
+
+    if ($limit !== null && is_numeric($limit) && $limit > 0) {
+        $sql .= " LIMIT ? OFFSET ?";
+        $params[] = (int)$limit;
+        $params[] = (int)$offset;
+        $types .= "ii";
+    }
+
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        // error_log("Get All Blogs Filtered Prepare Error: " . mysqli_error($conn));
+        return false;
+    }
+
+    if (!empty($types) && count($params) > 0) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $blogs = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    mysqli_stmt_close($stmt);
+    return $blogs;
+}
+
+/**
+ * Menghitung total blog dengan filter opsional (untuk paginasi).
+ * @param int|null $department_id
+ * @param string $status
+ * @return int|false
+ */
+function count_all_blogs_filtered($department_id = null, $status = 'published') {
+    global $conn;
+    $params = [];
+    $types = "";
+
+    $sql = "SELECT COUNT(b.id_blog) as total
+            FROM blog_ukim b
+            WHERE 1=1";
+
+    if (!empty($status)) {
+        $sql .= " AND b.status = ?";
+        $params[] = $status;
+        $types .= "s";
+    }
+
+     if ($department_id !== null && ctype_digit((string)$department_id) && $department_id > 0) {
+        $sql .= " AND b.id_dept = ?";
+        $params[] = (int)$department_id;
+        $types .= "i";
+    }
+
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        // error_log("Count Blogs Filtered Prepare Error: " . mysqli_error($conn));
+        return false;
+    }
+     if (!empty($types) && count($params) > 0) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+    return $row ? (int)$row['total'] : 0;
+}
+
+// Di dalam conn/controller.php
+
+/**
+ * Mengambil data satu blog berdasarkan SLUG.
+ * @param string $slug Slug blog.
+ * @return array|false Array data blog jika ditemukan, false jika tidak.
+ */
+function get_blog_by_slug($slug) {
+    global $conn;
+    // Ambil blog yang statusnya 'published'
+    $sql = "SELECT b.*, d.nama_dept, u.nama_lengkap as author_name
+            FROM blog_ukim b
+            LEFT JOIN departments d ON b.id_dept = d.id_dept
+            LEFT JOIN users u ON b.user_id = u.id_user
+            WHERE b.slug = ? AND b.status = 'published' LIMIT 1"; // Hanya ambil yang published
+    $stmt = mysqli_prepare($conn, $sql);
+
+     if (!$stmt) {
+        // error_log("Get Blog By SLUG Prepare Error: " . mysqli_error($conn));
+        return false;
+    }
+
+    mysqli_stmt_bind_param($stmt, "s", $slug);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $blog = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+    return $blog;
 }
 
 /**

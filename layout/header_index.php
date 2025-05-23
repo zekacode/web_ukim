@@ -1,6 +1,6 @@
 <?php
+require_once('./conn/controller.php'); // Cukup satu baris ini untuk memuat controller
 include('./conn/koneksi.php');
-include('./conn/controller.php');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -18,7 +18,7 @@ include('./conn/controller.php');
     <nav>
         <div class="logo-nav-container">
             <div class="logo">UKIM Unesa</div>
-            
+
             <!-- Nav Links for Desktop -->
             <ul class="nav-links">
                 <li><a href="index.php">Home</a></li>
@@ -29,7 +29,7 @@ include('./conn/controller.php');
         </div>
         <div class="login-container">
             <a href="login.php" class="btn-login">Login</a>
-        </div>  
+        </div>
         <!-- Burger Menu -->
         <div class="burger-menu" id="burger-menu">
                 <div class="line"></div>
@@ -40,7 +40,7 @@ include('./conn/controller.php');
 
     <!-- Nav Overlay for Mobile -->
     <div class="nav-overlay" id="nav-overlay">
-        <div class="close-btn" id="close-btn">&times;</div>
+        <div class="close-btn" id="close-btn">×</div>
         <ul class="nav-links-mobile">
             <li><a href="index.php">Home</a></li>
             <li><a href="list-artikel.php">Artikel</a></li>

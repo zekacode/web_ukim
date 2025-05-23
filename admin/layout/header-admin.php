@@ -43,7 +43,7 @@ $user_role = isset($_SESSION['user_role']) ? $_SESSION['user_role'] : null;
                 <li><a href="article.php"><i class="fas fa-blog"></i> Blog</a></li>
                 <li><a href="karya.php"><i class="fas fa-pencil-alt"></i> Karya Cipta</a></li>
                 <li><a href="event.php"><i class="fas fa-calendar-alt"></i> Event</a></li>
-                <li><a href="kelola_prestasi.php"><i class="fas fa-trophy"></i> Prestasi</a></li>
+                <li><a href="prestasi.php"><i class="fas fa-trophy"></i> Prestasi</a></li>
                 <?php // Tampilkan menu Kelola User hanya untuk role 'admin' ?>
                 <?php if ($user_role === 'admin'): ?>
                     <li><a href="kelola_user.php"><i class="fas fa-users-cog"></i> Kelola User</a></li>

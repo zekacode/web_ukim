@@ -68,6 +68,52 @@ body {
     gap: 5px;
 }
 
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.pagination {
+    list-style: none;
+    padding: 0;
+    display: flex;
+}
+
+.page-item {
+    margin: 0 5px;
+}
+
+.page-item .page-link {
+    display: block;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: var(--secondary-color, #0C356A); /* Gunakan variabel jika ada */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.page-item .page-link:hover {
+    background-color: #f0f0f0;
+    border-color: #ccc;
+}
+
+.page-item.active .page-link {
+    background-color: var(--secondary-color, #0C356A);
+    color: #fff;
+    border-color: var(--secondary-color, #0C356A);
+    font-weight: bold;
+}
+
+.page-item.disabled .page-link { /* Jika ingin ada state disabled */
+    color: #aaa;
+    pointer-events: none;
+    background-color: #f9f9f9;
+    border-color: #eee;
+}
+
 .articles-container {
     display: flex;
     flex-wrap: wrap;

@@ -44,7 +44,7 @@ include('./layout/header-admin.php');
                 <h3>Total Karya Cipta</h3>
                 <p class="count"><?php echo $count_karya; ?></p>
             </div>
-            <a href="kelola_karya.php" class="card-link">Kelola Karya <i class="fas fa-arrow-right"></i></a>
+            <a href="karya.php" class="card-link">Kelola Karya <i class="fas fa-arrow-right"></i></a>
         </div>
 
         <div class="summary-card">
@@ -72,7 +72,7 @@ include('./layout/header-admin.php');
                 <h3>Total Prestasi</h3>
                 <p class="count"><?php echo $count_prestasi; ?></p>
             </div>
-            <a href="kelola_prestasi.php" class="card-link">Kelola Prestasi <i class="fas fa-arrow-right"></i></a>
+            <a href="prestasi.php" class="card-link">Kelola Prestasi <i class="fas fa-arrow-right"></i></a>
         </div>
 
          <?php // Kartu Kelola User hanya untuk admin ?>

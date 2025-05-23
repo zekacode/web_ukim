@@ -98,37 +98,52 @@ include('./layout/header_index.php');
     </section>
 
     <!-- Updates Section -->
-    <section class="updates">
-        <h2>Blog</h2>
-        <p>Terbaru dari UKIM</p>
+        <section class="updates">
+        <h2>Blog Terbaru</h2> <?php // Ubah judul jika perlu ?>
+        <p>Informasi dan kegiatan terkini dari UKIM Unesa</p>
         <div class="card-container">
             <?php
-            // Query untuk mengambil 3 blog terbaru berdasarkan tanggal
-            $sql = "SELECT id_blog, tgl, judul, gambar, departemen FROM blog_ukim ORDER BY tgl DESC LIMIT 3";
-            $result = mysqli_query($conn, $sql);
+            // Mengambil 3 blog terbaru yang statusnya 'published' menggunakan fungsi dari controller
+            $latest_blogs = get_latest_blogs(3); // Atau get_all_blogs(3, 0) jika dimodifikasi
 
-            // Cek apakah query berhasil
-            if (!$result) {
-                die('Query failed: ' . mysqli_error($conn));
-            }
-
-            // Loop untuk menampilkan hasil query
-            while ($row = mysqli_fetch_assoc($result)) {
+            if ($latest_blogs && count($latest_blogs) > 0) {
+                foreach ($latest_blogs as $blog) {
             ?>
             <div class="card">
-                <?php if (!empty($row['gambar']) && $row['gambar'] !== '-') { ?>
-                    <img src="<?= $row['gambar']; ?>" alt="Image for <?= $row['judul']; ?>">
-                <?php } ?>
+                <?php
+                // Path gambar di database disimpan sebagai './asset/gbr_blog/namafile.jpg'
+                // Untuk menampilkannya dari index.php (yang ada di root), pathnya sudah benar
+                // Jika path di DB berbeda, sesuaikan di sini.
+                $gambar_path = htmlspecialchars($blog['gambar']);
+                // Jika path di DB tidak ada './' di depan, tambahkan:
+                // if (strpos($gambar_path, './') !== 0) {
+                //     $gambar_path = './' . ltrim($gambar_path, '/');
+                // }
+                ?>
+                <?php if (!empty($blog['gambar'])): ?>
+                    <img src="<?php echo $gambar_path; ?>" alt="Gambar untuk <?php echo htmlspecialchars($blog['judul']); ?>">
+                <?php else: ?>
+                    <img src="./asset/placeholder-image.png" alt="Placeholder Image"> <?php // Sediakan placeholder jika tidak ada gambar ?>
+                <?php endif; ?>
                 <div class="card-content">
-                    <span class="tag"><?= $row['departemen']; ?></span>
-                    <span class="date"><?= date("d/m/Y", strtotime($row['tgl'])); ?></span>
-                    <h3><?= htmlspecialchars($row['judul']); ?></h3>
+                    <?php // Menggunakan nama_dept dari hasil join di controller ?>
+                    <span class="tag"><?php echo htmlspecialchars($blog['nama_dept'] ?? 'Umum'); ?></span>
+                    <span class="date"><?php echo date("d M Y", strtotime($blog['created_at'])); ?></span>
+                    <h3><?php echo htmlspecialchars($blog['judul']); ?></h3>
                     <p>
-                        <a href="artikel.php?id=<?= $row['id_blog']; ?>" style="text-decoration: none; color: inherit;">Baca &rarr;</a>
+                        <?php // Link ke halaman detail blog, idealnya menggunakan slug ?>
+                        <a href="blog-detail.php?slug=<?php echo htmlspecialchars($blog['slug']); ?>" style="text-decoration: none; color: inherit;">Baca &rarr;</a>
+                        <?php // Atau jika masih menggunakan ID: ?>
+                        <!-- <a href="artikel.php?id=<?php //echo htmlspecialchars($blog['id_blog']); ?>" class="read-more-link">Baca Selengkapnya →</a> -->
                     </p>
                 </div>
             </div>
-            <?php } ?>
+            <?php
+                } // End foreach
+            } else {
+                echo "<p class='no-blogs-message'>Belum ada blog terbaru yang dipublikasikan.</p>";
+            }
+            ?>
         </div>
     </section>
 
