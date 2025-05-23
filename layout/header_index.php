@@ -24,6 +24,7 @@ include('./conn/koneksi.php');
                 <li><a href="index.php">Home</a></li>
                 <li><a href="list-artikel.php">Artikel</a></li>
                 <li><a href="list-karya.php">Karya Cipta</a></li>
+                <li><a href="list-prestasi.php">Prestasi</a></li>
                 <li><a href="list-event.php">Event</a></li>
             </ul>
         </div>
