@@ -1143,6 +1143,131 @@ function get_all_events($limit = null, $offset = 0) {
 }
 
 /**
+ * Mengambil semua data event dengan filter status dan paginasi.
+ * @param int|null $limit
+ * @param int $offset
+ * @param array $status_array Array status yang ingin diambil (e.g., ['upcoming', 'ongoing']).
+ * @param string $order_by Kolom untuk pengurutan (e.g., 'tgl_event_mulai ASC' atau 'created_at DESC').
+ * @return array|false
+ */
+function get_all_events_filtered($limit = null, $offset = 0, $status_array = ['upcoming', 'ongoing'], $order_by = 'tgl_event_mulai ASC') {
+    global $conn;
+    $params = [];
+    $types = "";
+
+    $sql = "SELECT e.id_event, e.slug, e.judul, e.tema, e.lokasi, e.gambar, e.tgl_event_mulai, e.status, e.link_pendaftaran, e.link_info
+            FROM events e
+            WHERE 1=1";
+
+    if (!empty($status_array) && is_array($status_array)) {
+        // Membuat placeholder sebanyak jumlah status di array
+        $placeholders = implode(',', array_fill(0, count($status_array), '?'));
+        $sql .= " AND e.status IN ($placeholders)";
+        foreach ($status_array as $status) {
+            $params[] = $status;
+            $types .= "s";
+        }
+    }
+
+    // Validasi $order_by untuk keamanan dasar (whitelist)
+    $allowed_order_by = ['tgl_event_mulai ASC', 'tgl_event_mulai DESC', 'created_at DESC', 'created_at ASC'];
+    if (in_array($order_by, $allowed_order_by)) {
+        $sql .= " ORDER BY " . $order_by; // Langsung append karena sudah di-whitelist
+    } else {
+        $sql .= " ORDER BY tgl_event_mulai ASC"; // Default order
+    }
+
+
+    if ($limit !== null && is_numeric($limit) && $limit > 0) {
+        $sql .= " LIMIT ? OFFSET ?";
+        $params[] = (int)$limit;
+        $params[] = (int)$offset;
+        $types .= "ii";
+    }
+
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        // error_log("Get All Events Filtered Prepare Error: " . mysqli_error($conn));
+        return false;
+    }
+
+    if (!empty($types) && count($params) > 0) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $events = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    mysqli_stmt_close($stmt);
+    return $events;
+}
+
+/**
+ * Menghitung total event dengan filter status (untuk paginasi).
+ * @param array $status_array
+ * @return int|false
+ */
+function count_all_events_filtered($status_array = ['upcoming', 'ongoing']) {
+    global $conn;
+    $params = [];
+    $types = "";
+
+    $sql = "SELECT COUNT(e.id_event) as total
+            FROM events e
+            WHERE 1=1";
+
+    if (!empty($status_array) && is_array($status_array)) {
+        $placeholders = implode(',', array_fill(0, count($status_array), '?'));
+        $sql .= " AND e.status IN ($placeholders)";
+        foreach ($status_array as $status) {
+            $params[] = $status;
+            $types .= "s";
+        }
+    }
+
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        // error_log("Count Events Filtered Prepare Error: " . mysqli_error($conn));
+        return false;
+    }
+     if (!empty($types) && count($params) > 0) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+    return $row ? (int)$row['total'] : 0;
+}
+
+/**
+ * Mengambil data satu event berdasarkan SLUG.
+ * @param string $slug Slug event.
+ * @return array|false Array data event jika ditemukan, false jika tidak.
+ */
+function get_event_by_slug($slug) {
+    global $conn;
+    // Ambil event yang statusnya tidak 'cancelled' atau 'past' (sesuaikan jika ingin menampilkan event 'past' juga)
+    $sql = "SELECT e.*, u.nama_lengkap as creator_name
+            FROM events e
+            LEFT JOIN users u ON e.user_id = u.id_user
+            WHERE e.slug = ? AND e.status IN ('upcoming', 'ongoing', 'past') LIMIT 1"; // Sesuaikan status yang valid
+    $stmt = mysqli_prepare($conn, $sql);
+
+     if (!$stmt) {
+        // error_log("Get Event By SLUG Prepare Error: " . mysqli_error($conn));
+        return false;
+    }
+
+    mysqli_stmt_bind_param($stmt, "s", $slug);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $event = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+    return $event;
+}
+
+/**
  * Mengambil data satu event berdasarkan ID.
  * @param int $id_event
  * @return array|false

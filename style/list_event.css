@@ -234,48 +234,6 @@ body {
     margin-top: auto;
 }
 
-.article-card .event-links {
-    display: flex;
-    gap: 10px; /* Jarak antar tombol */
-    flex-wrap: wrap; /* Agar tombol turun jika tidak cukup tempat */
-}
-
-.article-card .btn-event-action {
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-size: 0.85em;
-    font-weight: 500;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-    border: 1px solid transparent;
-    display: inline-flex; /* Untuk ikon dan teks sejajar */
-    align-items: center;
-    margin-left: 15px;
-}
-
-.article-card .btn-event-action i {
-    margin-right: 5px;
-}
-
-.article-card .btn-event-action.register {
-    background-color: var(--primary-color, #FFC436); /* Warna primer */
-    color: var(--text-dark-color, #333);
-    border-color: var(--primary-color, #FFC436);
-}
-.article-card .btn-event-action.register:hover {
-    background-color: #e0ac1c; /* Warna primer lebih gelap */
-}
-
-.article-card .btn-event-action.info {
-    background-color: var(--secondary-color, #0C356A); /* Warna sekunder */
-    color: var(--text-light-color, #FFFFFF);
-    border-color: var(--secondary-color, #0C356A);
-}
-.article-card .btn-event-action.info:hover {
-    background-color: #082346; /* Warna sekunder lebih gelap */
-}
-
 /* No Articles Message */
 .no-articles {
     text-align: center;

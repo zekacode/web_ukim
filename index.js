@@ -98,13 +98,18 @@ document.addEventListener('DOMContentLoaded', () => {
     animateOnScroll();
 });
 
-function initializeCountdown(tgl_event, countdownElement) {
-    console.log("Initializing countdown for date:", tgl_event); // Debug log
-    const eventDate = new Date(tgl_event).getTime();
+function initializeCountdown(eventDateStr, countdownElementId) {
+    const countdownTimerElement = document.querySelector(`#${countdownElementId} .countdown-timer`);
+    if (!countdownTimerElement) {
+        console.error("Countdown timer element not found for ID:", countdownElementId);
+        return;
+    }
+
+    const eventDate = new Date(eventDateStr).getTime();
 
     if (isNaN(eventDate)) {
-        countdownElement.innerHTML = "Invalid Event Date";
-        console.error("Invalid Event Date:", tgl_event); // Debug jika tanggal tidak valid
+        countdownTimerElement.innerHTML = "<p>Tanggal event tidak valid.</p>";
+        console.error("Invalid Event Date:", eventDateStr);
         return;
     }
 
@@ -114,8 +119,12 @@ function initializeCountdown(tgl_event, countdownElement) {
 
         if (distance < 0) {
             clearInterval(interval);
-            countdownElement.innerHTML = "Event Started";
-            console.log("Event Started"); // Debug jika event sudah dimulai
+            // Ganti seluruh section countdown dengan pesan event dimulai
+            const countdownSection = document.getElementById(countdownElementId);
+            if(countdownSection){
+                countdownSection.className = 'event-status-message started'; // Ubah class untuk styling
+                countdownSection.innerHTML = "<h3>Event Telah Dimulai!</h3>";
+            }
             return;
         }
 
@@ -124,11 +133,12 @@ function initializeCountdown(tgl_event, countdownElement) {
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        countdownElement.innerHTML = `
-            <div class="countdown-item"><h4>${days}</h4><span>Days</span></div>
-            <div class="countdown-item"><h4>${hours}</h4><span>Hours</span></div>
-            <div class="countdown-item"><h4>${minutes}</h4><span>Minutes</span></div>
-            <div class="countdown-item"><h4>${seconds}</h4><span>Seconds</span></div>
+        // Gunakan String().padStart(2, '0') untuk format dua digit
+        countdownTimerElement.innerHTML = `
+            <div class="countdown-item"><h4>${String(days).padStart(2, '0')}</h4><span>Hari</span></div>
+            <div class="countdown-item"><h4>${String(hours).padStart(2, '0')}</h4><span>Jam</span></div>
+            <div class="countdown-item"><h4>${String(minutes).padStart(2, '0')}</h4><span>Menit</span></div>
+            <div class="countdown-item"><h4>${String(seconds).padStart(2, '0')}</h4><span>Detik</span></div>
         `;
     }, 1000);
 }
