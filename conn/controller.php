@@ -1479,6 +1479,123 @@ function get_all_prestasi($limit = null, $offset = 0) {
 }
 
 /**
+ * Menghitung total semua data prestasi (untuk paginasi).
+ * @return int|false
+ */
+function count_all_prestasi() {
+    global $conn;
+    $sql = "SELECT COUNT(id_prestasi) as total FROM prestasi";
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        // error_log("Count All Prestasi Prepare Error: " . mysqli_error($conn));
+        return false;
+    }
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+    return $row ? (int)$row['total'] : 0;
+}
+
+/**
+ * Mengambil semua data prestasi dengan filter opsional dan paginasi.
+ * @param int|null $limit
+ * @param int $offset
+ * @param string|null $tingkat Filter berdasarkan tingkat.
+ * @param int|null $tahun Filter berdasarkan tahun.
+ * @return array|false
+ */
+function get_all_prestasi_filtered($limit = null, $offset = 0, $tingkat = null, $tahun = null) {
+    global $conn;
+    $params = [];
+    $types = "";
+
+    $sql = "SELECT p.*, u.nama_lengkap as pencatat_name
+            FROM prestasi p
+            LEFT JOIN users u ON p.user_id_pencatat = u.id_user
+            WHERE 1=1";
+
+    if (!empty($tingkat)) {
+        $sql .= " AND p.tingkat = ?";
+        $params[] = $tingkat;
+        $types .= "s";
+    }
+
+    if ($tahun !== null && ctype_digit((string)$tahun) && $tahun > 1900) {
+        $sql .= " AND p.tahun = ?";
+        $params[] = (int)$tahun;
+        $types .= "i";
+    }
+
+    $sql .= " ORDER BY p.tahun DESC, p.id_prestasi DESC"; // Urutkan dari tahun terbaru
+
+    if ($limit !== null && is_numeric($limit) && $limit > 0) {
+        $sql .= " LIMIT ? OFFSET ?";
+        $params[] = (int)$limit;
+        $params[] = (int)$offset;
+        $types .= "ii";
+    }
+
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        // error_log("Get All Prestasi Filtered Prepare Error: " . mysqli_error($conn));
+        return false;
+    }
+
+    if (!empty($types) && count($params) > 0) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $prestasi_list = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    mysqli_stmt_close($stmt);
+    return $prestasi_list;
+}
+
+/**
+ * Menghitung total prestasi dengan filter opsional (untuk paginasi).
+ * @param string|null $tingkat
+ * @param int|null $tahun
+ * @return int|false
+ */
+function count_all_prestasi_filtered($tingkat = null, $tahun = null) {
+    global $conn;
+    $params = [];
+    $types = "";
+
+    $sql = "SELECT COUNT(p.id_prestasi) as total
+            FROM prestasi p
+            WHERE 1=1";
+
+    if (!empty($tingkat)) {
+        $sql .= " AND p.tingkat = ?";
+        $params[] = $tingkat;
+        $types .= "s";
+    }
+
+    if ($tahun !== null && ctype_digit((string)$tahun) && $tahun > 1900) {
+        $sql .= " AND p.tahun = ?";
+        $params[] = (int)$tahun;
+        $types .= "i";
+    }
+
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) {
+        // error_log("Count Prestasi Filtered Prepare Error: " . mysqli_error($conn));
+        return false;
+    }
+     if (!empty($types) && count($params) > 0) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+    return $row ? (int)$row['total'] : 0;
+}
+
+/**
  * Mengambil data satu prestasi berdasarkan ID.
  * @param int $id_prestasi
  * @return array|false
