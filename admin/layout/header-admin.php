@@ -46,7 +46,7 @@ $user_role = isset($_SESSION['user_role']) ? $_SESSION['user_role'] : null;
                 <li><a href="prestasi.php"><i class="fas fa-trophy"></i> Prestasi</a></li>
                 <?php // Tampilkan menu Kelola User hanya untuk role 'admin' ?>
                 <?php if ($user_role === 'admin'): ?>
-                    <li><a href="kelola_user.php"><i class="fas fa-users-cog"></i> Kelola User</a></li>
+                    <li><a href="users.php"><i class="fas fa-users-cog"></i> Kelola User</a></li>
                 <?php endif; ?>
                 <li><a href="../conn/controller.php?action=logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>

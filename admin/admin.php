@@ -89,7 +89,7 @@ include('./layout/header-admin.php');
                 <h3>Total User Aktif</h3>
                 <p class="count"><?php echo $count_user; ?></p>
             </div>
-            <a href="kelola_user.php" class="card-link">Kelola User <i class="fas fa-arrow-right"></i></a>
+            <a href="users.php" class="card-link">Kelola User <i class="fas fa-arrow-right"></i></a>
         </div>
         <?php endif; ?>
 

@@ -298,6 +298,302 @@ function register_user($data) {
 
 // --- CRUD Functions ---
 
+// == CRUD Users ==
+
+/**
+ * Menambah user baru (biasanya oleh admin).
+ * @param array $data ['nama_lengkap', 'nim', 'jurusan', 'angkatan', 'email', 'username', 'password', 'role', 'status_keanggotaan'].
+ * @return int|string ID user baru jika berhasil, pesan error jika gagal.
+ */
+function create_user_by_admin($data) {
+    global $conn;
+
+    // Validasi dasar
+    $required_fields = ['nama_lengkap', 'email', 'username', 'password', 'role', 'status_keanggotaan'];
+    foreach ($required_fields as $field) {
+        if (empty($data[$field])) {
+            return "Mohon lengkapi semua field yang wajib diisi (nama, email, username, password, role, status).";
+        }
+    }
+    if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+        return "Format email tidak valid.";
+    }
+    if (strlen($data['password']) < 8) {
+        return "Password minimal harus 8 karakter.";
+    }
+
+    // Cek keunikan username
+    $stmt_check = mysqli_prepare($conn, "SELECT id_user FROM users WHERE username = ? LIMIT 1");
+    mysqli_stmt_bind_param($stmt_check, "s", $data['username']);
+    mysqli_stmt_execute($stmt_check);
+    mysqli_stmt_store_result($stmt_check);
+    if (mysqli_stmt_num_rows($stmt_check) > 0) {
+        mysqli_stmt_close($stmt_check);
+        return "Username sudah digunakan.";
+    }
+    mysqli_stmt_close($stmt_check);
+
+    // Cek keunikan email
+    $stmt_check_email = mysqli_prepare($conn, "SELECT id_user FROM users WHERE email = ? LIMIT 1");
+    mysqli_stmt_bind_param($stmt_check_email, "s", $data['email']);
+    mysqli_stmt_execute($stmt_check_email);
+    mysqli_stmt_store_result($stmt_check_email);
+    if (mysqli_stmt_num_rows($stmt_check_email) > 0) {
+        mysqli_stmt_close($stmt_check_email);
+        return "Email sudah terdaftar.";
+    }
+    mysqli_stmt_close($stmt_check_email);
+
+    // Cek keunikan NIM jika diisi
+    if (!empty($data['nim'])) {
+        $stmt_check_nim = mysqli_prepare($conn, "SELECT id_user FROM users WHERE nim = ? LIMIT 1");
+        mysqli_stmt_bind_param($stmt_check_nim, "s", $data['nim']);
+        mysqli_stmt_execute($stmt_check_nim);
+        mysqli_stmt_store_result($stmt_check_nim);
+        if (mysqli_stmt_num_rows($stmt_check_nim) > 0) {
+            mysqli_stmt_close($stmt_check_nim);
+            return "NIM sudah terdaftar.";
+        }
+        mysqli_stmt_close($stmt_check_nim);
+    }
+
+
+    $hashed_password = password_hash($data['password'], PASSWORD_DEFAULT);
+    $angkatan_val = !empty($data['angkatan']) ? (int)$data['angkatan'] : null;
+    $nim_val = !empty($data['nim']) ? $data['nim'] : null;
+    $jurusan_val = !empty($data['jurusan']) ? $data['jurusan'] : null;
+    $no_telp_val = !empty($data['no_telepon']) ? $data['no_telepon'] : null;
+    $foto_profil_val = null; // Untuk saat ini, upload foto profil bisa jadi fitur lanjutan
+
+    $sql = "INSERT INTO users (nama_lengkap, nim, jurusan, angkatan, email, no_telepon, username, password, role, status_keanggotaan, foto_profil, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
+    $stmt = mysqli_prepare($conn, $sql);
+
+    if (!$stmt) {
+        // error_log("Create User Admin Prepare Error: " . mysqli_error($conn));
+        return "Gagal menyiapkan statement database.";
+    }
+
+    mysqli_stmt_bind_param($stmt, "sssisssssss",
+        $data['nama_lengkap'], $nim_val, $jurusan_val, $angkatan_val,
+        $data['email'], $no_telp_val, $data['username'], $hashed_password,
+        $data['role'], $data['status_keanggotaan'], $foto_profil_val
+    );
+
+    if (mysqli_stmt_execute($stmt)) {
+        $new_id = mysqli_insert_id($conn);
+        mysqli_stmt_close($stmt);
+        return $new_id;
+    } else {
+        // error_log("Create User Admin Execute Error: " . mysqli_stmt_error($stmt));
+        mysqli_stmt_close($stmt);
+        return "Gagal menambahkan user ke database.";
+    }
+}
+
+/**
+ * Mengambil semua data user (untuk admin).
+ * @param int|null $limit
+ * @param int $offset
+ * @return array|false
+ */
+function get_all_users_admin($limit = null, $offset = 0) {
+    global $conn;
+    $sql = "SELECT id_user, nama_lengkap, nim, email, username, role, status_keanggotaan, created_at
+            FROM users
+            ORDER BY created_at DESC"; // Atau nama_lengkap ASC
+
+    if ($limit !== null && is_numeric($limit)) {
+        $sql .= " LIMIT ? OFFSET ?";
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "ii", $limit, $offset);
+    } else {
+         $stmt = mysqli_prepare($conn, $sql);
+    }
+
+     if (!$stmt) {
+        // error_log("Get All Users Admin Prepare Error: " . mysqli_error($conn));
+        return false;
+    }
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    mysqli_stmt_close($stmt);
+    return $users;
+}
+
+/**
+ * Menghitung total user (untuk paginasi admin).
+ * @return int|false
+ */
+function count_all_users_admin() {
+    global $conn;
+    $sql = "SELECT COUNT(id_user) as total FROM users";
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        return (int)$row['total'];
+    }
+    // error_log("Count All Users Admin Error: " . mysqli_error($conn));
+    return 0;
+}
+
+
+/**
+ * Mengambil data satu user berdasarkan ID (untuk admin edit).
+ * @param int $id_user
+ * @return array|false
+ */
+function get_user_by_id_admin($id_user) {
+    global $conn;
+    $sql = "SELECT id_user, nama_lengkap, nim, jurusan, angkatan, email, no_telepon, username, role, status_keanggotaan, foto_profil
+            FROM users
+            WHERE id_user = ?";
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) return false;
+    mysqli_stmt_bind_param($stmt, "i", $id_user);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $user = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+    return $user;
+}
+
+/**
+ * Memperbarui data user oleh admin.
+ * @param int $id_user ID user yang akan diupdate.
+ * @param array $data Data baru. Password dikosongkan jika tidak ingin diubah.
+ * @return bool|string True jika berhasil, pesan error jika gagal.
+ */
+function update_user_by_admin($id_user, $data) {
+    global $conn;
+
+    // Validasi dasar
+    $required_fields = ['nama_lengkap', 'email', 'username', 'role', 'status_keanggotaan'];
+    foreach ($required_fields as $field) {
+        if (empty($data[$field])) {
+            return "Nama, email, username, role, dan status wajib diisi.";
+        }
+    }
+    if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+        return "Format email tidak valid.";
+    }
+
+    // Cek keunikan username JIKA diubah dan BUKAN untuk user saat ini
+    $stmt_check = mysqli_prepare($conn, "SELECT id_user FROM users WHERE username = ? AND id_user != ? LIMIT 1");
+    mysqli_stmt_bind_param($stmt_check, "si", $data['username'], $id_user);
+    mysqli_stmt_execute($stmt_check);
+    mysqli_stmt_store_result($stmt_check);
+    if (mysqli_stmt_num_rows($stmt_check) > 0) {
+        mysqli_stmt_close($stmt_check);
+        return "Username sudah digunakan oleh user lain.";
+    }
+    mysqli_stmt_close($stmt_check);
+
+    // Cek keunikan email JIKA diubah dan BUKAN untuk user saat ini
+    $stmt_check_email = mysqli_prepare($conn, "SELECT id_user FROM users WHERE email = ? AND id_user != ? LIMIT 1");
+    mysqli_stmt_bind_param($stmt_check_email, "si", $data['email'], $id_user);
+    mysqli_stmt_execute($stmt_check_email);
+    mysqli_stmt_store_result($stmt_check_email);
+    if (mysqli_stmt_num_rows($stmt_check_email) > 0) {
+        mysqli_stmt_close($stmt_check_email);
+        return "Email sudah digunakan oleh user lain.";
+    }
+    mysqli_stmt_close($stmt_check_email);
+
+    // Cek keunikan NIM jika diisi dan BUKAN untuk user saat ini
+    if (!empty($data['nim'])) {
+        $stmt_check_nim = mysqli_prepare($conn, "SELECT id_user FROM users WHERE nim = ? AND id_user != ? LIMIT 1");
+        mysqli_stmt_bind_param($stmt_check_nim, "si", $data['nim'], $id_user);
+        mysqli_stmt_execute($stmt_check_nim);
+        mysqli_stmt_store_result($stmt_check_nim);
+        if (mysqli_stmt_num_rows($stmt_check_nim) > 0) {
+            mysqli_stmt_close($stmt_check_nim);
+            return "NIM sudah digunakan oleh user lain.";
+        }
+        mysqli_stmt_close($stmt_check_nim);
+    }
+
+
+    $angkatan_val = !empty($data['angkatan']) ? (int)$data['angkatan'] : null;
+    $nim_val = !empty($data['nim']) ? $data['nim'] : null;
+    $jurusan_val = !empty($data['jurusan']) ? $data['jurusan'] : null;
+    $no_telp_val = !empty($data['no_telepon']) ? $data['no_telepon'] : null;
+    // $foto_profil_val = ... (handle upload foto jika ada)
+
+    // Update password hanya jika diisi
+    if (!empty($data['password'])) {
+        if (strlen($data['password']) < 8) {
+            return "Password baru minimal harus 8 karakter.";
+        }
+        $hashed_password = password_hash($data['password'], PASSWORD_DEFAULT);
+        $sql = "UPDATE users SET nama_lengkap=?, nim=?, jurusan=?, angkatan=?, email=?, no_telepon=?, username=?, password=?, role=?, status_keanggotaan=?, updated_at=CURRENT_TIMESTAMP WHERE id_user=?";
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "sssissssssi",
+            $data['nama_lengkap'], $nim_val, $jurusan_val, $angkatan_val,
+            $data['email'], $no_telp_val, $data['username'], $hashed_password,
+            $data['role'], $data['status_keanggotaan'], $id_user
+        );
+    } else {
+        // Update tanpa password
+        $sql = "UPDATE users SET nama_lengkap=?, nim=?, jurusan=?, angkatan=?, email=?, no_telepon=?, username=?, role=?, status_keanggotaan=?, updated_at=CURRENT_TIMESTAMP WHERE id_user=?";
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "sssisssssi",
+            $data['nama_lengkap'], $nim_val, $jurusan_val, $angkatan_val,
+            $data['email'], $no_telp_val, $data['username'],
+            $data['role'], $data['status_keanggotaan'], $id_user
+        );
+    }
+
+    if (!$stmt) return "Gagal menyiapkan statement update.";
+
+    if (mysqli_stmt_execute($stmt)) {
+        mysqli_stmt_close($stmt);
+        return true;
+    } else {
+        mysqli_stmt_close($stmt);
+        return "Gagal mengupdate user.";
+    }
+}
+
+
+/**
+ * Menghapus user oleh admin.
+ * PENTING: Pertimbangkan apa yang terjadi pada konten yang dibuat user ini.
+ *          Foreign key constraint ON DELETE SET NULL pada tabel lain akan berguna.
+ *          Jangan biarkan admin menghapus dirinya sendiri.
+ * @param int $id_user ID user yang akan dihapus.
+ * @param int $current_admin_id ID admin yang melakukan aksi.
+ * @return bool True jika berhasil, false jika gagal.
+ */
+function delete_user_by_admin($id_user, $current_admin_id) {
+    global $conn;
+
+    if ($id_user == $current_admin_id) {
+        // error_log("Admin tried to delete self: Admin ID $current_admin_id, Target ID $id_user");
+        return false; // Admin tidak bisa menghapus dirinya sendiri
+    }
+
+    // Tambahan: Ambil data user untuk menghapus file profil jika ada
+    // $user = get_user_by_id_admin($id_user);
+    // if ($user && !empty($user['foto_profil'])) {
+    //     delete_file($user['foto_profil']); // Gunakan helper delete_file jika ada
+    // }
+
+    $sql = "DELETE FROM users WHERE id_user = ?";
+    $stmt = mysqli_prepare($conn, $sql);
+    if (!$stmt) return false;
+    mysqli_stmt_bind_param($stmt, "i", $id_user);
+
+    if (mysqli_stmt_execute($stmt)) {
+        mysqli_stmt_close($stmt);
+        return true;
+    } else {
+        mysqli_stmt_close($stmt);
+        return false;
+    }
+}
+
 // == Blog ==
 
 /**
